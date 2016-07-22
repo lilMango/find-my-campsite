@@ -3,43 +3,39 @@ console.log("hi")
 
 var ZION_PARKID = "70923";
 var COOKIE_URL = "http://www.recreation.gov/camping/watchman-campground-ut/r/campgroundDetails.do?contractCode=NRSO&parkId="+ZION_PARKID;
-var xhr = new XMLHttpRequest();
 
-function getCookie(parkId) {
-	
+
+function getCookie(parkId,cb) {
+	var xhr = new XMLHttpRequest();	
+
 	var procCookieReq = function (e) {
 		if (xhr.readyState == 4) {
 	    	if(xhr.status == 200) {
-	        	//console.log(xhr.responseText);
-	        	console.log('all response headers')
-	        	console.log(xhr.getAllResponseHeaders());	
-	        	console.log('Set-Cookie')
 	        	var cookieHeaderFields = xhr.getResponseHeader("Set-Cookie");
 	        	console.log(cookieHeaderFields);
 	        	for(var i=0;i< cookieHeaderFields.length;i++) {
 	        		var fields = cookieHeaderFields[i].split(';');
-	        		console.log('fields:')
-	        		console.log(fields)
 					var cookieValue = fields[0];
-					console.log('cookieValue:')
-					console.log(cookieValue);
 					// Correct cookie found
 					if (cookieValue.includes("JSESSIONID")) {
 
-						console.log("found JsessionID");
-						return cookieValue;
+						console.log("found JsessionID: "+cookieValue);
+						cb(ZION_PARKID,cookieValue);
+						//return cookieValue;
 					}
 	        	}
 	        	return "";
+	    	} else {
+	    		console.log("404 err @ procCookieReq");
 	    	}
 	    } else {
-	    	console.log('failed request');
+	    	console.log('still fetching @procCookieReq');
 	    }
 	}
 	
-	xhr.open('GET', COOKIE_URL, true);
-	xhr.send();
+	xhr.open('GET', COOKIE_URL, true);	
 	xhr.addEventListener("readystatechange", procCookieReq, false);	
+	xhr.send();
 }
 
 var paramsJson = {
@@ -56,7 +52,11 @@ var paramsJson = {
 }
 
 function findReservations(parkId,jSessionId) {
+	
 	console.log('findReservations('+parkId+","+jSessionId+")");
+	
+	var xhr = new XMLHttpRequest();	
+
 	var paramsURL="";
 
 	//json key vals to parameter string
@@ -73,33 +73,31 @@ function findReservations(parkId,jSessionId) {
 	console.log(paramsURL);
 
 
-	xhr.open('POST', "http://www.recreation.gov/campsiteSearch.do", true);
-	
+	xhr.open('POST', "http://www.recreation.gov/campsiteSearch.do", true);	
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    //xhr.setRequestHeader("Content-Length", paramsURL.length);
-    //xhr.setRequestHeader("Cookie", jSessionId);
+	xhr.withCredentials = true;  	
+	xhr.crossDomain = true;
+	xhr.setRequestHeader("Cookie",jSessionId);
 
     xhr.send(paramsURL);
    	xhr.addEventListener("readystatechange", function () {
 		if (xhr.readyState == 4) {
 	    	if(xhr.status == 200) {
-	    		var LINE_LENGTH=15;
-	    	
 	    		var responseText = xhr.responseText;	    		
-	    		console.log('-----------------------------------')
-	    		//console.log(responseText)
-	    		console.log('----------------------------------- End response')
-
-	    		var result = responseText.match(/<div class='matchSummary'>([\s\S]*?)<\/div>/); //result
+	    		//var result = responseText.match(/<div class='matchSummary'>([\s\S]*?)<\/div>/);
+	    		var result = responseText.match(/<div class='matchSummary'>([\s\S]*?)</);
 	    		console.log('result:');
 	    		console.log(result[1])
+	    		return result[1];
+	    	} else {
+	    		console.log("404 err @ findReservations");
 	    	}
 	    } else {
-	    	console.log('failed request');
+	    	console.log('still fetching');
 	    }
    	}, false);
 }
 
 
-var jSessionId = getCookie(ZION_PARKID);
-findReservations(ZION_PARKID,jSessionId);
+getCookie(ZION_PARKID,findReservations);
+//findReservations(ZION_PARKID,jSessionId);
