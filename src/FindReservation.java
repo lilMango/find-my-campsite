@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FindReservation {
 	
@@ -34,7 +36,6 @@ public class FindReservation {
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		
 		Map<String, List<String>> headerFields = conn.getHeaderFields();
-
 		Set<String> headerFieldsSet = headerFields.keySet();
 		Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
 		
@@ -67,6 +68,7 @@ public class FindReservation {
 
 	// Call to find reservations for a given campground
 	public static void findReservations(String parkId, String jSessionId) throws Exception{
+		
 		URL url = new URL("http://www.recreation.gov/campsiteSearch.do");
 		
 		// These are the parameters for our search. Will most likely need to adjust dates and camping_common_3012(num of people) only
@@ -115,14 +117,37 @@ public class FindReservation {
         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         String line = in.readLine();
         while (line != null){
+        	
         	//System.out.println(line);
         	// This line should tell us the number of sites available
         	// TODO - If this runs on a continuous script or something, maybe send a text or email alert here when this isn't 0
         	if (line.contains("site(s) available") || line.contains("site(s) found")){
         		System.out.println(line);
+
+        		System.out.println("We found " + parseNumber(line)+ " sites available");
+        		
         	}
         	line = in.readLine();
         }
+	}
+
+	/*
+		Parses expression for the number
+	*	returns number, else -1 if err
+	*/
+	public static int parseNumber(String line) {
+		String REGEX = "<div class='matchSummary'>([\\d]*?) site";
+		Pattern pattern = Pattern.compile(REGEX,Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(line);
+        
+        //extract exact number
+        while (matcher.find()) {
+        		String tmp = matcher.group(1);
+                System.out.println(tmp);
+                return Integer.parseInt(tmp);
+        }		
+
+		return -1;
 	}
 	
 }
