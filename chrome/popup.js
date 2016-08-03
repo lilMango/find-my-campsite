@@ -119,8 +119,22 @@ function findReservations(parkId,err) {
   }
 }
 
+function getTimeStamp() {
+    var now = new Date();
+    return ((now.getMonth() + 1) + '/' +
+            (now.getDate()) + '/' +
+             now.getFullYear() + " " +
+             now.getHours() + ':' +
+             ((now.getMinutes() < 10)
+                 ? ("0" + now.getMinutes())
+                 : (now.getMinutes())) + ':' +
+             ((now.getSeconds() < 10)
+                 ? ("0" + now.getSeconds())
+                 : (now.getSeconds())));
+}
+
 function renderStatus(statusText) {
-  document.getElementById('status').textContent = statusText;
+  document.getElementById('status').textContent = getTimeStamp()+"  "+statusText;
 }
 
 /**
@@ -132,13 +146,39 @@ var bglog = function(obj) {
   }
 }
 
+
+var alarmClock = {
+        alarmId: "myAlarm",
+        createAlarm : function(e) {
+            bglog("Alarm: ON");
+            chrome.alarms.create(alarmClock.alarmId, {delayInMinutes: 0.1, periodInMinutes: 0.2} );
+                    window.close();
+        },
+        cancelAlarm : function(e) {
+            bglog("Alarm: off");
+            chrome.alarms.clear(alarmClock.alarmId);
+                    window.close();
+        },
+        setup: function() {
+            var a = document.getElementById('alarmOn');
+            a.addEventListener('click',  alarmClock.createAlarm );
+            var a = document.getElementById('alarmOff');
+            a.addEventListener('click',  alarmClock.cancelAlarm );
+        }
+};
+
 /**
 * When the user clicks the chrome extension icon
 */
 document.addEventListener('DOMContentLoaded', function() {  
+
+alarmClock.setup();
 
   getCurrentTabUrl(function() {
     chrome.tabs.update({url: "http://www.recreation.gov"});    
   },
   findReservations);
 });
+
+
+

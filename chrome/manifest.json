@@ -7,7 +7,8 @@
   "background": {
         "scripts": [
             "background.js"
-        ]
+        ],
+        "persistent":false
   },
   "browser_action": {
     "default_icon": "icon.png",
@@ -16,6 +17,9 @@
   },
   "permissions": [
     "activeTab",
-    "http://www.recreation.gov/"
+    "http://www.recreation.gov/",
+    "alarms",
+    "tabs",
+    "notifications"
   ]
 }
