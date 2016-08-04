@@ -5,7 +5,7 @@ var RECREATION_URL = "recreation.gov";
  * @param {function(string)} callback - called when the URL of the current tab
  *   is found.
  */
-function getCurrentTabUrl(callback,cb) {
+function getCurrentTabUrl(redirectCb,cb) {
   // Query filter to be passed to chrome.tabs.query - see
   // https://developer.chrome.com/extensions/tabs#method-query
   var queryInfo = {
@@ -34,107 +34,15 @@ function getCurrentTabUrl(callback,cb) {
     
     if(url.indexOf(RECREATION_URL) !== -1) {  //sweet we arre on the recreation.gov site, run the script!!      
 
-      cb(ZION_PARKID);
+      cb();
     } else { //current tab not at Recreation.gov. Go to that site so we can by pass CORS problems when running script
       var val = confirm('Navigate to recreation.gov?');
       if(val === true) {
-        callback();
+        redirectCb();
       }      
     }
         
   });
-
-  // Most methods of the Chrome extension APIs are asynchronous. This means that
-  // you CANNOT do something like this:
-  //
-  // var url;
-  // chrome.tabs.query(queryInfo, function(tabs) {
-  //   url = tabs[0].url;
-  // });
-  // alert(url); // Shows "undefined", because chrome.tabs.query is async.
-}
-
-var ZION_PARKID = "70923";
-
-
-function findReservations(parkId,err) {
-
-  bglog('findReservations('+parkId+") ------- ");
-
-  var paramsJson = {
-      "parkId": ZION_PARKID,
-      "contractCode": "NRSO",        
-      "siteTypeFilter": "ALL",
-      "submitSiteForm": "true",
-      "search": "site",
-      "submitSiteForm": "true",
-      "currentMaximumWindow": "12",
-      "arrivalDate": "Fri Aug 26 2016",
-      "departureDate": "Sun Aug 28 2016",
-      "camping_common_3012": 4
-  }
-  
-  var xhr = new XMLHttpRequest(); 
-
-  var paramsURL="";
-
-  //json key vals to parameter string
-  for(var prop in paramsJson) {
-    if(paramsJson.hasOwnProperty(prop)) {
-      if(paramsURL !== "") {
-        paramsURL +="&";
-      }
-      paramsURL = paramsURL + prop + "=" + paramsJson[prop];
-
-    }
-  }
-  bglog("Parameters:");
-  bglog(paramsURL);
-
-
-  xhr.open('POST', "http://www.recreation.gov/campsiteSearch.do", true);  
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  
-  xhr.send(paramsURL);
-  xhr.onload = function() {
-  //xhr.addEventListener("readystatechange", function () {
-  if (xhr.readyState == 4) {
-      if(xhr.status == 200) {
-        var responseText = xhr.responseText;          
-        var result = responseText.match(/<div class='matchSummary'>([\s\S]*?)</);        
-        bglog('result: '+result[1]);
-        renderStatus(result[1]);
-        return result[1];
-      } else {
-        bglog("404 err @ findReservations");
-      }
-    } else {
-      bglog('still fetching');
-    }
-  //}, false);
-  }
-
-  xhr.onerror = function() {
-    err("Error @ findReservations");
-  }
-}
-
-function getTimeStamp() {
-    var now = new Date();
-    return ((now.getMonth() + 1) + '/' +
-            (now.getDate()) + '/' +
-             now.getFullYear() + " " +
-             now.getHours() + ':' +
-             ((now.getMinutes() < 10)
-                 ? ("0" + now.getMinutes())
-                 : (now.getMinutes())) + ':' +
-             ((now.getSeconds() < 10)
-                 ? ("0" + now.getSeconds())
-                 : (now.getSeconds())));
-}
-
-function renderStatus(statusText) {
-  document.getElementById('status').textContent = getTimeStamp()+"  "+statusText;
 }
 
 /**
@@ -148,21 +56,21 @@ var bglog = function(obj) {
 
 
 var alarmClock = {
-        alarmId: "myAlarm",
+        id: "myAlarm",
         createAlarm : function(e) {
             bglog("Alarm: ON");
-            chrome.alarms.create(alarmClock.alarmId, {delayInMinutes: 0.1, periodInMinutes: 0.2} );
+            chrome.alarms.create(alarmClock.id, {delayInMinutes: 0.1, periodInMinutes: 15.0} );
                     window.close();
         },
         cancelAlarm : function(e) {
             bglog("Alarm: off");
-            chrome.alarms.clear(alarmClock.alarmId);
+            chrome.alarms.clear(alarmClock.id);
                     window.close();
         },
-        setup: function() {
-            var a = document.getElementById('alarmOn');
+        setup: function(onEl,offEl) {
+            var a = document.getElementById(onEl);
             a.addEventListener('click',  alarmClock.createAlarm );
-            var a = document.getElementById('alarmOff');
+            var a = document.getElementById(offEl);
             a.addEventListener('click',  alarmClock.cancelAlarm );
         }
 };
@@ -172,12 +80,20 @@ var alarmClock = {
 */
 document.addEventListener('DOMContentLoaded', function() {  
 
-alarmClock.setup();
+  alarmClock.setup("alarmOnBtn","alarmOffLink");
 
   getCurrentTabUrl(function() {
     chrome.tabs.update({url: "http://www.recreation.gov"});    
   },
-  findReservations);
+  function() {
+     CAMP.findReservations( function(result) {
+        console.log('result: '+result);
+          
+          var msg = UTILS.getTimeStampPretty()+'  '+result; 
+          document.getElementById('status').textContent = msg;
+
+     });
+  });
 });
 
 
