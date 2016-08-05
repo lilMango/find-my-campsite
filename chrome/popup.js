@@ -1,4 +1,10 @@
+/**
+ * Popup.js - Clicked actions for chrome extension button
+ *
+ */
+
 var RECREATION_URL = "recreation.gov";
+
 /**
  * Get the current URL.
  *
@@ -54,33 +60,12 @@ var bglog = function(obj) {
   }
 }
 
-
-var alarmClock = {
-        id: "myAlarm",
-        createAlarm : function(e) {
-            bglog("Alarm: ON");
-            chrome.alarms.create(alarmClock.id, {delayInMinutes: 0.1, periodInMinutes: 15.0} );
-                    window.close();
-        },
-        cancelAlarm : function(e) {
-            bglog("Alarm: off");
-            chrome.alarms.clear(alarmClock.id);
-                    window.close();
-        },
-        setup: function(onEl,offEl) {
-            var a = document.getElementById(onEl);
-            a.addEventListener('click',  alarmClock.createAlarm );
-            var a = document.getElementById(offEl);
-            a.addEventListener('click',  alarmClock.cancelAlarm );
-        }
-};
-
 /**
 * When the user clicks the chrome extension icon
 */
 document.addEventListener('DOMContentLoaded', function() {  
 
-  alarmClock.setup("alarmOnBtn","alarmOffLink");
+  ALARM.setup("alarmOnBtn","alarmOffLink");
 
   getCurrentTabUrl(function() {
     chrome.tabs.update({url: "http://www.recreation.gov"});    

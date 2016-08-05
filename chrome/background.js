@@ -1,3 +1,7 @@
+/*
+* The background script runs thoughout the lifetime of chrome session (lasts longer than being on active recreation.gov tab)
+
+*/
 alert("here in background.js");
 console.log("Hello, background.js")
 
@@ -10,7 +14,6 @@ var onMessageListener = function(message, sender, sendResponse) {
     return true;
 }
 chrome.runtime.onMessage.addListener(onMessageListener);
-
 
 
 /*

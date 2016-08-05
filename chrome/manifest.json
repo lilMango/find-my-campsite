@@ -6,7 +6,7 @@
   "version": "1.0",
   "background": {
         "scripts": [
-            "background.js"
+            "background.js","campfinder.js","utils.js"
         ],
         "persistent":false
   },
