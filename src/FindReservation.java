@@ -12,20 +12,44 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 public class FindReservation {
 	
 	public static final String YOSEMITE_PARKID = "70925"; // Yosemite - Upper Pines
 	public static final String ZION_PARKID = "70923"; // Zion - Watchman
 
+	public static final int DELAY_EXEC_SECONDS = 0;
+	public static final int PERIOD_EXEC_SECONDS = 120;
+
 	public static void main(String[] args)
 	{	
-		try {
-			String parkId = ZION_PARKID;
-			String jSessionId = getCookie(parkId);
-			findReservations(parkId, jSessionId);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
+		//scheduler script
+		Runnable helloRunnable = new Runnable() {
+	    	public void run() {
+
+	        	try { 
+		        	String parkId = ZION_PARKID;
+					String jSessionId = getCookie(parkId);
+					boolean found = findReservations(parkId, jSessionId);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+    		}
+		};
+
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+		executor.scheduleAtFixedRate(helloRunnable, DELAY_EXEC_SECONDS, PERIOD_EXEC_SECONDS, TimeUnit.SECONDS);
+			
+
 	}
 	
 	// Grab the JSESSIONID cookie that is needed to make the next call to find available reservations
@@ -67,7 +91,10 @@ public class FindReservation {
 	}
 
 	// Call to find reservations for a given campground
-	public static void findReservations(String parkId, String jSessionId) throws Exception{
+	/*
+	 * Returns true if found at least one campsite
+	 */
+	public static boolean findReservations(String parkId, String jSessionId) throws Exception{
 		
 		URL url = new URL("http://www.recreation.gov/campsiteSearch.do");
 		
@@ -123,12 +150,18 @@ public class FindReservation {
         	// TODO - If this runs on a continuous script or something, maybe send a text or email alert here when this isn't 0
         	if (line.contains("site(s) available") || line.contains("site(s) found")){
         		System.out.println(line);
-
-        		System.out.println("We found " + parseNumber(line)+ " sites available");
-        		
+        		int numFound = parseNumber(line);
+        		System.out.println("We found " + numFound+ " sites available");
+        		logResult(parsePhrase(line));
+        		if (numFound>0) {
+        			logResult("Found an available site!!");
+        			return true;
+        		}
         	}
         	line = in.readLine();
         }
+
+        return false;
 	}
 
 	/*
@@ -150,4 +183,43 @@ public class FindReservation {
 		return -1;
 	}
 	
+	/*
+	* Parse for sentence
+	*/ 
+	public static String parsePhrase(String line) {
+		String REGEX = "<div class='matchSummary'>([\\s\\S]*?)<a";
+		Pattern pattern = Pattern.compile(REGEX,Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(line);
+        
+        //extract exact number
+        while (matcher.find()) {
+        		String tmp = matcher.group(1);
+                System.out.println(tmp);
+                return tmp;
+        }		
+
+		return "";
+	}
+	public static void logResult(String line) {
+    	try{
+    		File file =new File("log-results.txt");
+
+    		//if file doesnt exists, then create it
+    		if(!file.exists()){
+    			file.createNewFile();
+    		}
+
+    		//true = append file
+    		FileWriter fileWritter = new FileWriter(file.getName(),true);
+	        BufferedWriter bufferedWriter = new BufferedWriter(fileWritter);
+	        bufferedWriter.write(line);
+	        bufferedWriter.newLine();
+	        bufferedWriter.close();
+
+	        System.out.println("Done");
+
+    	}catch(IOException e){
+    		e.printStackTrace();
+    	}
+	}
 }
