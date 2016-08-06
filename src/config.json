@@ -1,0 +1,43 @@
+{
+	"SCRIPT_PERIOD_MINUTES": 15,
+	"FROM_GMAIL_USERNAME": "mvp7spam@gmail.com",
+	"FROM_GMAIL_PASSWORD": "mvp7spam",
+	"EMAIL_RECIPIENT" : "miguelpaysan+nps@gmail.com",
+	"SUCCESS_REGEX": ["TODO","<div class='matchSummary'>([\\d]*?) site","<div class='matchSummary'>([\\s\\S]*?)<a"],
+	"ERROR_REGEX": ["TODO"],
+	"FAILURE_REGEX": ["TODO"],
+	"campParameters": [
+		{	"alias": "ZION_WATCHMAN",
+	    	"parkId": 70923,
+	    	"contractCode": "NRSO",        
+	        "siteTypeFilter": "ALL",
+	        "submitSiteForm": "true",
+	        "search": "site",
+	        "submitSiteForm": "true",
+	        "currentMaximumWindow": "12",
+	        "arrivalDate": "Fri Aug 26 2016",
+	        "departureDate": "Sun Aug 28 2016",
+	        "camping_common_3012": 4
+		},
+		{	"alias": "YOSEMITE_UPPERCAMPGROUND_TODO_FINDWAY_TO_GET_THIS_FROM_PAGE",
+	    	"parkId": 70925,
+	    	"contractCode": "NRSO",        
+	        "siteTypeFilter": "ALL",
+	        "submitSiteForm": "true",
+	        "search": "site",
+	        "submitSiteForm": "true",
+	        "currentMaximumWindow": "12",
+	        "arrivalDate": "Fri Aug 26 2016",
+	        "departureDate": "Sun Aug 28 2016",
+			"availStatus": "",
+			"flexDates": "",
+			"loop": "",
+			"siteCode": "",
+			"lookingFor": "",
+			"camping_common_218": 0,
+			"camping_common_3012": 4,
+			"camping_common_3013": 0,
+	        "camping_common_3012": 4
+		}
+		]
+}

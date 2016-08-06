@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class FindReservation {
 	
-	public static final String YOSEMITE_PARKID = "70925"; // Yosemite - Upper Pines
+	public static final String YOSEMITE_PARKID = "70925"; // Yosemite - Upper Pines TODO Make hashmap for all the parks
 	public static final String ZION_PARKID = "70923"; // Zion - Watchman
 
 	public static final int DELAY_EXEC_SECONDS = 0;
@@ -31,7 +31,9 @@ public class FindReservation {
 
 	public static void main(String[] args)
 	{	
-
+		//TODO load config file here...
+		
+		
 		//scheduler script
 		Runnable helloRunnable = new Runnable() {
 	    	public void run() {
@@ -39,9 +41,14 @@ public class FindReservation {
 	        	try { 
 		        	String parkId = ZION_PARKID;
 					String jSessionId = getCookie(parkId);
-					boolean found = findReservations(parkId, jSessionId);
+					boolean found = findReservations(parkId, jSessionId);					
+					
+					if (found) {
+						MailSender mailSender = MailSender.getInstance();
+						mailSender.sendMessage("ZION camp spot open! Go ahead and book it: http://www.recreation.gov" );
+					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					e.printStackTrace();				
 				}
     		}
 		};
@@ -150,8 +157,7 @@ public class FindReservation {
         	// TODO - If this runs on a continuous script or something, maybe send a text or email alert here when this isn't 0
         	if (line.contains("site(s) available") || line.contains("site(s) found")){
         		System.out.println(line);
-        		int numFound = parseNumber(line);
-        		System.out.println("We found " + numFound+ " sites available");
+        		int numFound = parseNumber(line);        		
         		logResult(parsePhrase(line));
         		if (numFound>0) {
         			logResult("Found an available site!!");
@@ -215,8 +221,6 @@ public class FindReservation {
 	        bufferedWriter.write(line);
 	        bufferedWriter.newLine();
 	        bufferedWriter.close();
-
-	        System.out.println("Done");
 
     	}catch(IOException e){
     		e.printStackTrace();
