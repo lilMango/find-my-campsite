@@ -9,14 +9,17 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 public class MailSender {
-	private static String GMAIL_USERNAME = "INSERT_EMAIL_HERE";
-	private static String GMAIL_PASSWORD = "INSERT_EMAIL_PASS HERE";
-	private static String RECIPIENT = "INSERT_RECIPEIENT EMAIL HERE";
+	private static String GMAIL_USERNAME = "";
+	private static String GMAIL_PASSWORD = "";
+	private static String RECIPIENT = "";
 	
 	private static MailSender instance = null;	
 	
 	protected MailSender() {
-		
+		Config config = ConfigLoader.getConfig();
+		GMAIL_USERNAME = config.getFromGmailUsername();
+		GMAIL_PASSWORD = config.getFromGmailPassword();
+		RECIPIENT = config.getEmailRecipient();		
 	}
 		
 	public static MailSender getInstance() {

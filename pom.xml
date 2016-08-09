@@ -44,13 +44,19 @@
     </plugins>
   </build>
   
-  <dependencies>
-	<!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
+  <dependencies>	
 	<dependency>
 	    <groupId>javax.mail</groupId>
 	    <artifactId>javax.mail-api</artifactId>
 	    <version>1.5.1</version>
 	</dependency>
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-databind</artifactId>
+		<version>2.6.3</version>
+	</dependency>
   </dependencies>
+  
+  
   
 </project>

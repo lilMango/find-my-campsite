@@ -27,12 +27,13 @@ public class FindReservation {
 	public static final String ZION_PARKID = "70923"; // Zion - Watchman
 
 	public static final int DELAY_EXEC_SECONDS = 0;
-	public static final int PERIOD_EXEC_SECONDS = 120;
+	public static int PERIOD_EXEC_SECONDS;
 
 	public static void main(String[] args)
 	{	
 		//TODO load config file here...
-		
+		ConfigLoader configLoader = ConfigLoader.getInstance();
+		PERIOD_EXEC_SECONDS = ConfigLoader.getConfig().getScriptPeriodSeconds();
 		
 		//scheduler script
 		Runnable helloRunnable = new Runnable() {
@@ -54,7 +55,7 @@ public class FindReservation {
 		};
 
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-		executor.scheduleAtFixedRate(helloRunnable, DELAY_EXEC_SECONDS, PERIOD_EXEC_SECONDS, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(helloRunnable, DELAY_EXEC_SECONDS, PERIOD_EXEC_SECONDS, TimeUnit.MINUTES);
 			
 
 	}
@@ -114,8 +115,8 @@ public class FindReservation {
         params.put("search", "site");
         params.put("submitSiteForm", "true");
         params.put("currentMaximumWindow", "12");
-        params.put("arrivalDate", "Fri Aug 26 2016");
-        params.put("departureDate", "Sun Aug 28 2016");
+        params.put("arrivalDate", "Fri Sep 02 2016");
+        params.put("departureDate", "Sun Sep 04 2016");
 //        params.put("availStatus", "");
 //        params.put("flexDates", "");
 //        params.put("loop", "");
