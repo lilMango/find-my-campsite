@@ -1,27 +1,32 @@
 {
-	"scriptPeriodSeconds": 900,
-	"fromGmailUsername": "PUT GMAIL SENDER_EMAIL_HERE",
-	"fromGmailPassword": "GMAIL SENDER PASSWORD HERE",
-	"emailRecipient" : "RECEIVING EMAIL HERE",
+	"scriptPeriodSeconds": 300,
+	"fromGmailUsername": "<INSERT_HERE@gmail.com>",
+	"fromGmailPassword": "<INSERT_HERE@gmail.com>",
+	"emailRecipient" : "<INSERT_HERE@gmail.com>",
 	"successRegex": ["TODO","<div class='matchSummary'>([\\d]*?) site","<div class='matchSummary'>([\\s\\S]*?)<a"],
 	"failureRegex": ["TODO"],
 	"errorRegex": ["TODO"],
 	"campParameters": [
 		{	"id":1,
-			"alias": "ZION_WATCHMAN",
+			"alias": "Zion-Watchman_campground",
+			"campName" : "watchman-campground-ut",
 	    	"parkId": 70923,
+	    	"emailRecipient":"EMAIL_HERE_TODO_PER_QUERY_BASIS",
 	    	"contractCode": "NRSO",        
 	        "siteTypeFilter": "ALL",
 	        "submitSiteForm": "true",
-	        "search": "site",	        
+	        "search": "site",
+	        "submitSiteForm": "true",
 	        "currentMaximumWindow": "12",
 	        "arrivalDate": "Fri Aug 26 2016",
 	        "departureDate": "Sun Aug 28 2016",
 	        "camping_common_3012": 4
 		},
 		{	"id":2,
-			"alias": "YOSEMITE_UPPERCAMPGROUND_TODO_FINDWAY_TO_GET_THIS_FROM_PAGE",
+			"alias": "YOSEMITE_UPPERCAMPGROUND_FRIendly name",
+			"campName":"upper-pines",
 	    	"parkId": 70925,
+	    	"emailRecipient":"EMAIL_HERE_TODO_PER_QUERY_BASIS",
 	    	"contractCode": "NRSO",        
 	        "siteTypeFilter": "ALL",
 	        "submitSiteForm": "true",
@@ -38,7 +43,8 @@
 			"camping_common_218": 0,
 			"camping_common_3012": 4,
 			"camping_common_3013": 0,
-	        "camping_common_3012": 4
+	        "camping_common_3012": 4,
+	        "comment":"YOSEMITE_UPPERCAMPGROUND_TODO_FINDWAY_TO_GET_THIS_FROM_PAGE"
 		}
 		]
 }

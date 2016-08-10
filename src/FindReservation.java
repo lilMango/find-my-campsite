@@ -22,32 +22,49 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class FindReservation {
-	
-	public static final String YOSEMITE_PARKID = "70925"; // Yosemite - Upper Pines TODO Make hashmap for all the parks
-	public static final String ZION_PARKID = "70923"; // Zion - Watchman
-
+		
 	public static final int DELAY_EXEC_SECONDS = 0;
 	public static int PERIOD_EXEC_SECONDS;
 
 	public static void main(String[] args)
 	{	
-		//TODO load config file here...
 		ConfigLoader configLoader = ConfigLoader.getInstance();
-		PERIOD_EXEC_SECONDS = ConfigLoader.getConfig().getScriptPeriodSeconds();
+		Config config = ConfigLoader.getConfig();
+		
+		PERIOD_EXEC_SECONDS = config.getScriptPeriodSeconds();
+		System.out.println("Loading from config.json:");
+		System.out.println("period of execution(seconds):"+PERIOD_EXEC_SECONDS);
+		System.out.println("Gmail user:"+config.getFromGmailUsername());
+		System.out.println("Gmail pass:"+config.getFromGmailPassword());
+		System.out.println("Email recipient:"+config.getEmailRecipient());
+		
+		List<CampQueryParam> cqpArr = config.getCampParameters();
+		for(CampQueryParam c:cqpArr) {
+			System.out.println(c.toString());
+		}
+		
 		
 		//scheduler script
 		Runnable helloRunnable = new Runnable() {
 	    	public void run() {
 
 	        	try { 
-		        	String parkId = ZION_PARKID;
-					String jSessionId = getCookie(parkId);
-					boolean found = findReservations(parkId, jSessionId);					
+		        	
+		        	//CampQueryParam cqp = CampQueryParam.getSampleZionQuery();
+	        		List<CampQueryParam> cqpArr = ConfigLoader.getConfig().getCampParameters();
+	        		for(CampQueryParam cqp:cqpArr) {
+	        			System.out.println("######## Querying:"+cqp.getAlias()+" ...");
+	        			boolean found = findReservations(cqp);					
+						
+						if (found) {
+							MailSender mailSender = MailSender.getInstance();
+							String msg = String.format("%s camp spot open! Go ahead and book it: http://www.recreation.gov", cqp.getAlias());
+							mailSender.sendMessage(msg);
+						}
+	        		}
+	        		
+		        	
 					
-					if (found) {
-						MailSender mailSender = MailSender.getInstance();
-						mailSender.sendMessage("ZION camp spot open! Go ahead and book it: http://www.recreation.gov" );
-					}
 				} catch (Exception e) {
 					e.printStackTrace();				
 				}
@@ -55,15 +72,22 @@ public class FindReservation {
 		};
 
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-		executor.scheduleAtFixedRate(helloRunnable, DELAY_EXEC_SECONDS, PERIOD_EXEC_SECONDS, TimeUnit.MINUTES);
+		executor.scheduleAtFixedRate(helloRunnable, DELAY_EXEC_SECONDS, PERIOD_EXEC_SECONDS, TimeUnit.SECONDS);
 			
 
 	}
 	
 	// Grab the JSESSIONID cookie that is needed to make the next call to find available reservations
-	public static String getCookie(String parkId) throws Exception{
+	public static String getCookie(CampQueryParam campQueryParams) throws Exception{
+		String campName="";
+		String parkId="";
+		
+		campName = campQueryParams.getCampName();
+		parkId = campQueryParams.getParkId()+"";
+		
 		// This initial call will set/give us the cookie we need
-		String urlString = "http://www.recreation.gov/camping/watchman-campground-ut/r/campgroundDetails.do?contractCode=NRSO&parkId=" + parkId;
+		String urlString = String.format("http://www.recreation.gov/camping/%s/r/campgroundDetails.do?contractCode=NRSO&parkId=%s",campName,parkId);
+		System.out.println(urlString);
 		URL url = new URL(urlString);
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		
@@ -94,7 +118,7 @@ public class FindReservation {
 				 }
 			 }
 		}
-		
+		System.out.println("No cookie found!");
 		return "";
 	}
 
@@ -102,29 +126,15 @@ public class FindReservation {
 	/*
 	 * Returns true if found at least one campsite
 	 */
-	public static boolean findReservations(String parkId, String jSessionId) throws Exception{
+	public static boolean findReservations(CampQueryParam campQueryParams) throws Exception{
+		
+		String jSessionId = getCookie(campQueryParams);
 		
 		URL url = new URL("http://www.recreation.gov/campsiteSearch.do");
 		
 		// These are the parameters for our search. Will most likely need to adjust dates and camping_common_3012(num of people) only
-        Map<String,Object> params = new LinkedHashMap<>();
-        params.put("contractCode", "NRSO");
-        params.put("parkId", parkId);
-        params.put("siteTypeFilter", "ALL");
-        params.put("submitSiteForm", "true");
-        params.put("search", "site");
-        params.put("submitSiteForm", "true");
-        params.put("currentMaximumWindow", "12");
-        params.put("arrivalDate", "Fri Sep 02 2016");
-        params.put("departureDate", "Sun Sep 04 2016");
-//        params.put("availStatus", "");
-//        params.put("flexDates", "");
-//        params.put("loop", "");
-//        params.put("siteCode", "");
-//        params.put("lookingFor", "");
-//        params.put("camping_common_218", "0");
-        params.put("camping_common_3012", "4");
-//        params.put("camping_common_3013", "0");
+        Map<String,Object> params = campQueryParams.getParamsMap();
+        
 
         // Build our request with the given params
         StringBuilder postData = new StringBuilder();
@@ -157,7 +167,7 @@ public class FindReservation {
         	// This line should tell us the number of sites available
         	// TODO - If this runs on a continuous script or something, maybe send a text or email alert here when this isn't 0
         	if (line.contains("site(s) available") || line.contains("site(s) found")){
-        		System.out.println(line);
+        		
         		int numFound = parseNumber(line);        		
         		logResult(parsePhrase(line));
         		if (numFound>0) {
@@ -183,7 +193,6 @@ public class FindReservation {
         //extract exact number
         while (matcher.find()) {
         		String tmp = matcher.group(1);
-                System.out.println(tmp);
                 return Integer.parseInt(tmp);
         }		
 
@@ -200,13 +209,13 @@ public class FindReservation {
         
         //extract exact number
         while (matcher.find()) {
-        		String tmp = matcher.group(1);
-                System.out.println(tmp);
-                return tmp;
+    		String tmp = matcher.group(1);
+    		System.out.println(tmp);
+            return tmp;
         }		
-
 		return "";
 	}
+	
 	public static void logResult(String line) {
     	try{
     		File file =new File("log-results.txt");

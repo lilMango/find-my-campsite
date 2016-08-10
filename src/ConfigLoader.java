@@ -48,6 +48,9 @@ public class ConfigLoader {
 	}
 	
 	public static Config getConfig() {
+		if(instance==null) {
+			instance = new ConfigLoader();
+		}
 		return config;
 	}
 	
