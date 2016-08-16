@@ -1,3 +1,4 @@
 /target/
 src/*.class
 *.class
+node_modules

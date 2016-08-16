@@ -1,4 +1,5 @@
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+
 console.log("hi")
 
 var ZION_PARKID = "70923";
