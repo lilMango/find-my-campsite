@@ -1,0 +1,17 @@
+
+{
+  "name": "find-my-campsite",
+  "version": "0.2.0",
+  "description": "Find my campsite webserver",
+  "author": "github.com/lilMango",   
+  "repository": {
+  	"type": "git",
+  	"url": "https://github.com/lilMango/find-my-campsite/"
+  },
+  "dependencies": {
+    "bluebird": "~3.4.0",
+    "request": "*"
+  },  
+  "private": true, 
+  "analyze": true  
+}
