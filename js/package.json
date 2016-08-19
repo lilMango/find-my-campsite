@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "bluebird": "~3.4.0",
-    "request": "*"
+    "request": "*",
+    "restify": "~4.0.0",
+    "nodemailer":"~2.3.0"
   },  
   "private": true, 
   "analyze": true  

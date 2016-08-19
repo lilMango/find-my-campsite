@@ -3,8 +3,6 @@ var http = require('http');
 var Promise = require('bluebird');
 var Request = Promise.promisify(require('request'),{multiArgs:true});
 
-
-
 var parkId = "70923";//zion
 var COOKIE_URL = "http://www.recreation.gov/camping/watchman-campground-ut/r/campgroundDetails.do?contractCode=NRSO&parkId="+parkId;
 
@@ -21,8 +19,10 @@ var defaultParamsJson = {
 	"camping_common_3012": 4
 }
 
-
-function queryReservation(campOptions) {	
+/*
+* Expects callback 'cb' to determine what to do with integer parsed result
+*/
+function findReservation(campOptions,cb) {	
 
 	var queryParams = {};
 
@@ -63,7 +63,8 @@ function queryReservation(campOptions) {
 	    });
 	}
 
-	var findReservation = function(jSessionId) {
+	// returns number of sites available
+	var queryReservation = function(jSessionId) {
 
 	    var reqOptions = {
 	        url: 'http://www.recreation.gov/campsiteSearch.do',
@@ -78,34 +79,24 @@ function queryReservation(campOptions) {
 	    return new Request(reqOptions).spread(function (response) {
 	        if (response.statusCode == 200) {    
 	            var responseText = response.body;
-	            var result = responseText.match(/<div class='matchSummary'>([\s\S]*?)</);
-	            console.log(result[1] + 'for '+ campOptions['alias'])
+	            //var result = responseText.match(/<div class='matchSummary'>([\s\S]*?)</); //gets sentence
+	            var result = responseText.match(/<div class='matchSummary'>([\d]*?) site/); //parses number out
 	                
 	            return result[1];
 	        } else {
 	            // TODO 200 is not the only successful code
-	            throw new Error("FindReservation() -> HTTP Error: " + response.statusCode );
+	            throw new Error("QueryReservation() -> HTTP Error: " + response.statusCode );
 	        }
 	    });
 	    
 	}
 
-	getCookie().then(findReservation).catch(function(err){
+	getCookie().then(queryReservation).then(cb).catch(function(err){
 	    console.log('err on Bluebird promise')
 	    console.log(err);
 	});
 }
 
-//Executing...
-
-var config = require('../config.json');
-var campParamsArr = config.campParameters; 
-
-for(var i=0; i <campParamsArr.length;i++) {
-	var campParams = campParamsArr[i];
-		
-	queryReservation(campParams);		
-}
-
+module.exports.findReservation = findReservation;
 
 
