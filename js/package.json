@@ -1,19 +1,24 @@
-
 {
   "name": "find-my-campsite",
   "version": "0.2.0",
   "description": "Find my campsite webserver",
-  "author": "github.com/lilMango",   
+  "author": "github.com/lilMango",
   "repository": {
-  	"type": "git",
-  	"url": "https://github.com/lilMango/find-my-campsite/"
+    "type": "git",
+    "url": "https://github.com/lilMango/find-my-campsite/"
   },
   "dependencies": {
     "bluebird": "~3.4.0",
     "request": "*",
     "restify": "~4.0.0",
-    "nodemailer":"~2.3.0"
-  },  
-  "private": true, 
-  "analyze": true  
+    "nodemailer": "~2.3.0"
+  },
+  "devDependencies": {
+    "assert": "^1.4.1",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "mocha": "^3.0.2"
+  },
+  "private": true,
+  "analyze": true
 }

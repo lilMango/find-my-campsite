@@ -7,7 +7,7 @@ var parkId = "70923";//zion
 var COOKIE_URL = "http://www.recreation.gov/camping/watchman-campground-ut/r/campgroundDetails.do?contractCode=NRSO&parkId="+parkId;
 
 var defaultParamsJson = {
-	"parkId": parkId,
+	"parkId": "70923",
 	"contractCode": "NRSO",        
 	"siteTypeFilter": "ALL",
 	"submitSiteForm": "true",
@@ -19,10 +19,13 @@ var defaultParamsJson = {
 	"camping_common_3012": 4
 }
 
+
+
 /*
-* Expects callback 'cb' to determine what to do with integer parsed result
+* Returns a promise, which you '.then' a result-callback
+* ie. Campfinder.findReservation({...}).then( <function here>)
 */
-function findReservation(campOptions,cb) {	
+function findReservation(campOptions) {	
 
 	var queryParams = {};
 
@@ -91,12 +94,12 @@ function findReservation(campOptions,cb) {
 	    
 	}
 
-	getCookie().then(queryReservation).then(cb).catch(function(err){
-	    console.log('err on Bluebird promise')
-	    console.log(err);
-	});
+	return getCookie().then(queryReservation);	
 }
 
-module.exports.findReservation = findReservation;
+var res = {};
+res.sampleParams = defaultParamsJson;
+res.findReservation = findReservation
+module.exports = res;
 
 
